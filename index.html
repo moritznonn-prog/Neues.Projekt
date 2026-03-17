@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoShape</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Permanent+Marker&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8f5f0;
+            --text-color: #333;
+            --card-flag: #ffb347;
+            --card-outline: #77dd77;
+            --card-endstation: #cda434; /* Geändert von lila zu gold für Variation */
+            --correct: #4caf50;
+            --wrong: #f44336;
+            --btn-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 900;
+        }
+
+        .lang-switch {
+            display: flex;
+            gap: 10px;
+        }
+
+        .lang-btn {
+            background: var(--btn-bg);
+            border: 2px solid #ddd;
+            border-radius: 20px;
+            padding: 5px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: inherit;
+        }
+
+        .lang-btn.active {
+            border-color: var(--text-color);
+            background: var(--text-color);
+            color: #fff;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        h1, h2, h3 {
+            background: var(--btn-bg);
+            display: inline-block;
+            padding: 10px 30px;
+            border-radius: 30px;
+            border: 2px solid #eee;
+        }
+
+        /* Home Screen */
+        .modes-grid {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        .mode-card {
+            width: 250px;
+            height: 180px;
+            border-radius: 20px;
+            border: 3px solid rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-size: 20px;
+            font-weight: bold;
+            color: #111;
+        }
+
+        .mode-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .mode-flag { background-color: var(--card-flag); }
+        .mode-outline { background-color: var(--card-outline); }
+        .mode-endstation { background-color: var(--card-endstation); }
+
+        /* Game Screen */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .score-display {
+            font-size: 18px;
+            font-weight: bold;
+            background: var(--btn-bg);
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 2px solid #ddd;
+        }
+
+        .cancel-btn {
+            background: #ff7b7b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: inherit;
+        }
+
+        .media-container {
+            margin: 20px auto;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .media-container img {
+            max-height: 100%;
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .option-btn {
+            background: var(--btn-bg);
+            border: 2px solid #ddd;
+            padding: 15px;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .option-btn:hover {
+            border-color: var(--text-color);
+        }
+
+        .option-btn.correct { background-color: var(--correct); color: white; border-color: var(--correct); }
+        .option-btn.wrong { background-color: var(--wrong); color: white; border-color: var(--wrong); }
+
+        /* Result Screen */
+        .graffiti {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 60px;
+            color: #ff007f;
+            text-shadow: 3px 3px 0px #00e5ff, -3px -3px 0px #ffea00;
+            margin: 40px 0;
+            animation: pop 0.5s ease-out;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.5); opacity: 0; }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .stars { font-size: 40px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">🌍 GeoShape</div>
+        <div class="lang-switch">
+            <button class="lang-btn active" onclick="setLang('de')">DE</button>
+            <button class="lang-btn" onclick="setLang('en')">EN</button>
+        </div>
+    </header>
+
+    <div id="home-screen" class="container screen active">
+        <h2 id="t-daily">Tägliche Spiele</h2>
+        <div class="modes-grid">
+            <div class="mode-card mode-flag" onclick="startGame('flag')">
+                <span id="t-mode-flag">Flaggen Quiz</span>
+            </div>
+            <div class="mode-card mode-outline" onclick="startGame('outline')">
+                <span id="t-mode-outline">Umriss Quiz</span>
+            </div>
+            <div class="mode-card mode-endstation" onclick="startGame('endstation')">
+                <span id="t-mode-endstation">Endstation Quiz</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-screen" class="container screen">
+        <div class="game-header">
+            <button class="cancel-btn" onclick="goHome()" id="t-cancel">Abbrechen</button>
+            <div class="score-display">Score: <span id="score-val">0</span>/10 <span id="round-val">(Runde 1)</span></div>
+        </div>
+        
+        <h3 id="question-text">Welches Land ist das?</h3>
+        
+        <div class="media-container">
+            <img id="game-media" src="" alt="Quiz Media">
+        </div>
+
+        <div class="options-grid" id="options-container">
+            </div>
+    </div>
+
+    <div id="result-screen" class="container screen">
+        <div class="stars" id="result-stars">⭐⭐⭐</div>
+        <div class="graffiti" id="result-text">AWESOME</div>
+        <h3 id="final-score-text">Du hast 8/10 richtig!</h3>
+        <button class="option-btn" style="margin-top: 30px;" onclick="goHome()" id="t-back-home">Zurück zum Start</button>
+    </div>
+
+<script>
+    // --- DATABASE (Erweitere diese Liste für alle 250 Länder) ---
+    // Nutze Wikipedia SVG URLs für die outlines oder eigene Bilder
+    const database = [
+        { id: 'de', flag: 'https://flagcdn.com/w320/de.png', outline: 'https://upload.wikimedia.org/wikipedia/commons/e/e3/Germany_outline.svg', name: { de: 'Deutschland', en: 'Germany' }, fact: { de: '4 mal Weltmeister 🏆', en: '4 times World Champion 🏆' } },
+        { id: 'fr', flag: 'https://flagcdn.com/w320/fr.png', outline: 'https://upload.wikimedia.org/wikipedia/commons/a/a2/Outline_map_of_France.svg', name: { de: 'Frankreich', en: 'France' }, fact: { de: 'Eiffelturm 🗼', en: 'Eiffel Tower 🗼' } },
+        { id: 'jp', flag: 'https://flagcdn.com/w320/jp.png', outline: 'https://upload.wikimedia.org/wikipedia/commons/6/6c/Japan_outline.svg', name: { de: 'Japan', en: 'Japan' }, fact: { de: 'Land der aufgehenden Sonne 🌅', en: 'Land of the rising sun 🌅' } },
+        { id: 'br', flag: 'https://flagcdn.com/w320/br.png', outline: 'https://upload.wikimedia.org/wikipedia/commons/0/05/Brazil_outline.svg', name: { de: 'Brasilien', en: 'Brazil' }, fact: { de: 'Amazonas Regenwald 🌳', en: 'Amazon Rainforest 🌳' } },
+        { id: 'ca', flag: 'https://flagcdn.com/w320/ca.png', outline: 'https://upload.wikimedia.org/wikipedia/commons/d/d4/Canada_outline.svg', name: { de: 'Kanada', en: 'Canada' }, fact: { de: 'Ahornsirup 🍁', en: 'Maple Syrup 🍁' } },
+        { id: 'eg', flag: 'https://flagcdn.com/w320/eg.png', outline: 'https://upload.wikimedia.org/wikipedia/commons/a/ab/Egypt_outline.svg', name: { de: 'Ägypten', en: 'Egypt' }, fact: { de: 'Die Pyramiden 🐫', en: 'The Pyramids 🐫' } },
+        { id: 'it', flag: 'https://flagcdn.com/w320/it.png', outline: 'https://upload.wikimedia.org/wikipedia/commons/0/03/Italy_outline.svg', name: { de: 'Italien', en: 'Italy' }, fact: { de: 'Kolosseum 🍕', en: 'Colosseum 🍕' } },
+        { id: 'au', flag: 'https://flagcdn.com/w320/au.png', outline: 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Australia_outline.svg', name: { de: 'Australien', en: 'Australia' }, fact: { de: 'Kängurus 🦘', en: 'Kangaroos 🦘' } },
+        { id: 'mx', flag: 'https://flagcdn.com/w320/mx.png', outline: 'https://upload.wikimedia.org/wikipedia/commons/2/23/Mexico_outline.svg', name: { de: 'Mexiko', en: 'Mexico' }, fact: { de: 'Chichén Itzá 🌮', en: 'Chichén Itzá 🌮' } },
+        { id: 'za', flag: 'https://flagcdn.com/w320/za.png', outline: 'https://upload.wikimedia.org/wikipedia/commons/6/6e/South_Africa_outline.svg', name: { de: 'Südafrika', en: 'South Africa' }, fact: { de: 'Tafelberg ⛰️', en: 'Table Mountain ⛰️' } },
+        { id: 'in', flag: 'https://flagcdn.com/w320/in.png', outline: 'https://upload.wikimedia.org/wikipedia/commons/4/4b/India_outline.svg', name: { de: 'Indien', en: 'India' }, fact: { de: 'Taj Mahal 🕌', en: 'Taj Mahal 🕌' } }
+    ];
+
+    // --- TRANSLATIONS ---
+    const i18n = {
+        de: {
+            daily: 'Tägliche Spiele', modeFlag: 'Flaggen Quiz', modeOutline: 'Umriss Quiz', modeEndstation: 'Endstation Quiz',
+            cancel: 'Abbrechen', round: 'Runde', questionFlag: 'Welches Land ist das?', questionOutline: 'Welcher Umriss ist das?', questionEndstation: 'Welcher Fakt passt zur Flagge?',
+            backHome: 'Zurück zum Start', resultAwesome: 'AWESOME', resultTryAgain: 'TRY AGAIN', scoreMsg: 'Du hast {score}/10 richtig!'
+        },
+        en: {
+            daily: 'Daily Games', modeFlag: 'Flag Quiz', modeOutline: 'Outline Quiz', modeEndstation: 'Trivia Quiz',
+            cancel: 'Cancel', round: 'Round', questionFlag: 'Which country is this?', questionOutline: 'Which outline is this?', questionEndstation: 'Which fact fits the flag?',
+            backHome: 'Back to Home', resultAwesome: 'AWESOME', resultTryAgain: 'TRY AGAIN', scoreMsg: 'You got {score}/10 correct!'
+        }
+    };
+
+    let currentLang = 'de';
+    let currentMode = '';
+    let currentRound = 0;
+    let score = 0;
+    let gameQueue = []; 
+    let endstationOptions = [];
+    let isAnswering = false;
+
+    // --- LANGUAGE LOGIC ---
+    function setLang(lang) {
+        currentLang = lang;
+        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        updateTexts();
+        if(currentMode !== '') renderOptions(); // Refresh answers language if in game
+    }
+
+    function updateTexts() {
+        const t = i18n[currentLang];
+        document.getElementById('t-daily').innerText = t.daily;
+        document.getElementById('t-mode-flag').innerText = t.modeFlag;
+        document.getElementById('t-mode-outline').innerText = t.modeOutline;
+        document.getElementById('t-mode-endstation').innerText = t.modeEndstation;
+        document.getElementById('t-cancel').innerText = t.cancel;
+        document.getElementById('t-back-home').innerText = t.backHome;
+        
+        if(currentMode === 'flag') document.getElementById('question-text').innerText = t.questionFlag;
+        if(currentMode === 'outline') document.getElementById('question-text').innerText = t.questionOutline;
+        if(currentMode === 'endstation') document.getElementById('question-text').innerText = t.questionEndstation;
+    }
+
+    // --- GAME LOGIC ---
+    function shuffle(array) {
+        return array.sort(() => Math.random() - 0.5);
+    }
+
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    function goHome() {
+        currentMode = '';
+        showScreen('home-screen');
+    }
+
+    function startGame(mode) {
+        currentMode = mode;
+        currentRound = 0;
+        score = 0;
+        isAnswering = false;
+        
+        // Select 10 random countries for the game
+        let shuffledDb = shuffle([...database]);
+        // Wenn du 250 Länder hast, stelle sicher, dass wir hier 10 abschneiden. 
+        // Für das Beispiel nehmen wir Math.min(10, db.length).
+        let maxRounds = Math.min(10, shuffledDb.length);
+        gameQueue = shuffledDb.slice(0, maxRounds);
+
+        if (mode === 'endstation') {
+            // Die 10 Auswahlmöglichkeiten bleiben fest für das ganze Spiel
+            endstationOptions = shuffle([...gameQueue]);
+        }
+
+        updateTexts();
+        showScreen('game-screen');
+        playRound();
+    }
+
+    function playRound() {
+        if (currentRound >= gameQueue.length || currentRound >= 10) {
+            endGame();
+            return;
+        }
+
+        isAnswering = false;
+        const currentCountry = gameQueue[currentRound];
+        
+        // UI Update
+        document.getElementById('score-val').innerText = score;
+        document.getElementById('round-val').innerText = `(${i18n[currentLang].round} ${currentRound + 1})`;
+        
+        const mediaEl = document.getElementById('game-media');
+        if (currentMode === 'flag' || currentMode === 'endstation') {
+            mediaEl.src = currentCountry.flag;
+        } else if (currentMode === 'outline') {
+            mediaEl.src = currentCountry.outline;
+        }
+
+        renderOptions();
+    }
+
+    function renderOptions() {
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        const currentCountry = gameQueue[currentRound];
+        let options = [];
+
+        if (currentMode === 'flag' || currentMode === 'outline') {
+            // 1 richtige, 3 falsche aus der restlichen DB
+            let wrongAnswers = database.filter(c => c.id !== currentCountry.id);
+            wrongAnswers = shuffle(wrongAnswers).slice(0, 3);
+            options = shuffle([currentCountry, ...wrongAnswers]);
+            
+            // Grid anpassen für 4 Buttons
+            container.style.gridTemplateColumns = "1fr 1fr";
+            
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt.name[currentLang];
+                btn.onclick = () => checkAnswer(btn, opt.id, currentCountry.id);
+                container.appendChild(btn);
+            });
+        } 
+        else if (currentMode === 'endstation') {
+            // 10 feste Fakten
+            container.style.gridTemplateColumns = "1fr 1fr"; // oder 1fr je nach Textlänge
+            
+            endstationOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt.fact[currentLang];
+                btn.onclick = () => checkAnswer(btn, opt.id, currentCountry.id);
+                container.appendChild(btn);
+            });
+        }
+    }
+
+    function checkAnswer(btn, selectedId, correctId) {
+        if (isAnswering) return;
+        isAnswering = true;
+
+        if (selectedId === correctId) {
+            btn.classList.add('correct');
+            score++;
+        } else {
+            btn.classList.add('wrong');
+            // Zeige die richtige Antwort grün an
+            Array.from(document.getElementById('options-container').children).forEach(childBtn => {
+                // Finde den Button, der die richtige ID repräsentiert
+                // Da wir die ID nicht direkt im DOM speichern, überprüfen wir Text (workaround für dieses kurze Script)
+                const correctObj = database.find(c => c.id === correctId);
+                const correctText = currentMode === 'endstation' ? correctObj.fact[currentLang] : correctObj.name[currentLang];
+                if(childBtn.innerText === correctText) {
+                    childBtn.classList.add('correct');
+                }
+            });
+        }
+
+        document.getElementById('score-val').innerText = score;
+
+        setTimeout(() => {
+            currentRound++;
+            playRound();
+        }, 1500); // 1.5 Sekunden warten bevor nächste Runde startet
+    }
+
+    function endGame() {
+        showScreen('result-screen');
+        const t = i18n[currentLang];
+        
+        document.getElementById('final-score-text').innerText = t.scoreMsg.replace('{score}', score);
+        
+        const resText = document.getElementById('result-text');
+        const resStars = document.getElementById('result-stars');
+
+        // Neustart der Animation erzwingen
+        resText.style.animation = 'none';
+        resText.offsetHeight; 
+        resText.style.animation = 'pop 0.5s ease-out';
+
+        if (score >= 7) {
+            resText.innerText = t.resultAwesome;
+            resText.style.color = '#ff007f';
+            resStars.innerText = '⭐⭐⭐';
+        } else {
+            resText.innerText = t.resultTryAgain;
+            resText.style.color = '#333';
+            resText.style.textShadow = 'none';
+            resStars.innerText = '⭐';
+        }
+    }
+
+    // Initiale Sprachensetzung
+    updateTexts();
+</script>
+</body>
+</html>
